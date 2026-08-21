@@ -1,0 +1,69 @@
+{
+    "name": "czu-pef/ldap",
+    "description": "Reusable CZU LDAP integration for Laravel: authentication, user lookup and streaming bulk export.",
+    "homepage": "https://github.com/czu-pef/ldap",
+    "support": {
+        "issues": "https://github.com/czu-pef/ldap/issues",
+        "source": "https://github.com/czu-pef/ldap"
+    },
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "ext-ldap": "*",
+        "illuminate/contracts": "^13.0",
+        "illuminate/support": "^13.0",
+        "nesbot/carbon": "^3.0"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^5.0"
+    },
+    "suggest": {
+        "fakerphp/faker": "Required by LdapFake to generate users when no LDAP server is configured."
+    },
+    "autoload": {
+        "psr-4": {
+            "CzuPef\\Ldap\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CzuPef\\Ldap\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CzuPef\\Ldap\\LdapServiceProvider"
+            ],
+            "aliases": {
+                "Ldap": "CzuPef\\Ldap\\Facades\\Ldap"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "archive": {
+        "exclude": [
+            "/tests",
+            "/phpunit.xml",
+            "/phpstan.neon",
+            "/pint.json"
+        ]
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "lint": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse"
+    }
+}
