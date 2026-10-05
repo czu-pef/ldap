@@ -9,15 +9,15 @@ Requires PHP 8.3+, Laravel 13 and `ext-ldap`.
 
 ## Install
 
-The package lives in a private repository, so each project needs a
-`repositories` entry before requiring it:
+The package is not on Packagist, so add the repository to your project's
+`composer.json` before requiring it:
 
 ```jsonc
 // composer.json
 "repositories": [
     {
         "type": "vcs",
-        "url": "git@github.com:czu-pef/ldap.git"
+        "url": "https://github.com/czu-pef/ldap"
     }
 ]
 ```
@@ -25,10 +25,6 @@ The package lives in a private repository, so each project needs a
 ```bash
 composer require czu-pef/ldap
 ```
-
-Composer needs credentials that can read `czu-pef/ldap` — an SSH key on the
-`czu-pef` account for local work, and a personal access token with `repo` scope
-in CI (`composer config --global --auth github-oauth.github.com <token>`).
 
 The service provider is auto-discovered. Publish the config only if you need to
 change a filter or the base DN:
