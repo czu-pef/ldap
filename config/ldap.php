@@ -77,7 +77,7 @@ return [
         'search' => '(&(objectClass=user)(czuUIC=*)(|(sn=*{query}*)(givenname=*{query}*)(czuuic=*{query}*)))',
 
         // cursor()/chunk() — every real, active, non-expired person.
-        'all' => '(&(!(objectclass=computer))(objectClass=user)(!(|(samAccountName=ext.)(samAccountName=svc.)(userAccountControl:1.2.840.113556.1.4.803:=2)(extensionAttribute10=Expired)))(extensionAttribute7=O365_Import)(czuUIC=*))',
+        'all' => '(&(!(objectclass=computer))(objectClass=user)(!(|(samAccountName=ext.*)(samAccountName=svc.*)(userAccountControl:1.2.840.113556.1.4.803:=2)(extensionAttribute10=Expired)))(extensionAttribute7=O365_Import)(czuUIC=*))',
 
     ],
 
