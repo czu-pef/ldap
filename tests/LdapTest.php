@@ -19,6 +19,14 @@ function buildFilter(string $name, string $query): string
     return (new ReflectionMethod(Ldap::class, 'filter'))->invoke(new Ldap, $name, $query);
 }
 
+/**
+ * Reach the protected search() filter builder.
+ */
+function buildSearchFilter(string $query): string
+{
+    return (new ReflectionMethod(Ldap::class, 'searchFilter'))->invoke(new Ldap, $query);
+}
+
 it('resolves the real driver when a server is configured', function (): void {
     config(['ldap.server' => 'ldap.czu.cz']);
 
@@ -61,3 +69,33 @@ it('fails loudly when connecting without a server', function (): void {
 
     (new Ldap)->connection();
 })->throws(LdapException::class, 'LDAP server is not configured.');
+
+it('keeps a single-word search filter identical to the configured template', function (): void {
+    expect(buildSearchFilter('novak'))
+        ->toBe(buildFilter('search', 'novak'))
+        ->toBe('(&(objectClass=user)(czuUIC=*)(|(sn=*novak*)(givenname=*novak*)(czuuic=*novak*)))')
+        // Surrounding whitespace is trimmed rather than searched for.
+        ->and(buildSearchFilter('  novak '))->toBe(buildFilter('search', 'novak'));
+});
+
+it('requires every word of a multi-word search to match', function (): void {
+    expect(buildSearchFilter('  Novák   Jan '))->toBe(
+        '(&'
+        .'(&(objectClass=user)(czuUIC=*)(|(sn=*Novák*)(givenname=*Novák*)(czuuic=*Novák*)))'
+        .'(&(objectClass=user)(czuUIC=*)(|(sn=*Jan*)(givenname=*Jan*)(czuuic=*Jan*)))'
+        .')'
+    );
+});
+
+it('applies a custom search template to each word', function (): void {
+    config(['ldap.filters.search' => '(cn=*{query}*)']);
+
+    expect(buildSearchFilter('Jan Novák'))->toBe('(&(cn=*Jan*)(cn=*Novák*))');
+});
+
+it('escapes each word of a multi-word search', function (): void {
+    expect(buildSearchFilter('Novák a)(cn=*'))
+        ->toBe('(&'.buildFilter('search', 'Novák').buildFilter('search', 'a)(cn=*').')')
+        ->toContain('(sn=*a\\29\\28cn=\\2a*)')
+        ->not->toContain('a)(cn=*');
+});

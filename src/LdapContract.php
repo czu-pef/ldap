@@ -20,6 +20,12 @@ interface LdapContract
     /**
      * Search users by name or UIC.
      *
+     * The query is split on whitespace and every word has to match the
+     * surname, first name or UIC, in any order: "Novák Jan" and "Jan Novák"
+     * both find Jan Novák, while "Jan Novák" no longer finds Petr Novák.
+     * Matching is case-insensitive; whether "Novak" finds "Novák" is up to
+     * the directory's collation (the fake never folds diacritics).
+     *
      * @return Collection<int, LdapUser>
      */
     public function search(string $query, int $limit = 10): Collection;

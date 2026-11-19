@@ -80,9 +80,30 @@ class Ldap implements LdapContract
 
     public function search(string $query, int $limit = 10): Collection
     {
-        $entries = $this->run($this->filter('search', $query), limit: $limit);
+        $entries = $this->run($this->searchFilter($query), limit: $limit);
 
         return $this->hydrate($entries);
+    }
+
+    /**
+     * Build the search() filter: every word of the query has to match the
+     * configured `search` template on its own, in any order.
+     *
+     * A single word yields exactly filter('search', $word), so projects that
+     * override the template keep getting the filter they configured.
+     */
+    protected function searchFilter(string $query): string
+    {
+        $words = SearchQuery::words($query);
+
+        if (count($words) <= 1) {
+            return $this->filter('search', $words[0] ?? '');
+        }
+
+        return '(&'.implode('', array_map(
+            fn (string $word): string => $this->filter('search', $word),
+            $words,
+        )).')';
     }
 
     public function cursor(?string $filter = null, ?array $attributes = null): Generator

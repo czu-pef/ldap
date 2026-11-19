@@ -141,7 +141,13 @@ involved.
 ```php
 $user = Ldap::find('jnovak@czu.cz');   // ?LdapUser — exact match, null unless exactly one hit
 $users = Ldap::search('novak', 20);    // Collection<int, LdapUser> — fuzzy, for pickers
+$users = Ldap::search('Jan Novák');    // every word must match, in any order
 ```
+
+`search()` splits the query on whitespace and applies the `search` filter from
+`config('ldap.filters.search')` to each word, joined with `(&…)`. A
+single-word query produces exactly the configured filter, so an overridden
+template with `{query}` keeps working unchanged.
 
 ### Read attributes the package does not model
 

@@ -131,13 +131,17 @@ class LdapFake implements LdapContract
             return new Collection;
         }
 
-        $needle = Str::lower($query);
+        $words = (new Collection(SearchQuery::words($query)))->map(Str::lower(...));
 
+        // Every word must appear somewhere, in any order. No words at all
+        // matches nobody, as the single-needle Str::contains() check did.
         $matches = $this->users()
-            ->filter(fn (LdapUser $user): bool => Str::contains(
-                Str::lower($user->name().' '.$user->uic),
-                $needle,
-            ))
+            ->filter(function (LdapUser $user) use ($words): bool {
+                $haystack = Str::lower($user->name().' '.$user->uic);
+
+                return $words->isNotEmpty()
+                    && $words->every(static fn (string $word): bool => str_contains($haystack, $word));
+            })
             ->values();
 
         if ($matches->isEmpty() && static::$resolver === null) {

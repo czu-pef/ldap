@@ -116,3 +116,22 @@ it('never matches an empty query', function (): void {
 
     expect($fake->find(''))->toBeNull();
 });
+
+it('matches every word of a search in any order', function (): void {
+    $fake = Ldap::fake([
+        LdapUser::fake(['first_name' => 'Jan', 'last_name' => 'Novák', 'uic' => 111111]),
+        LdapUser::fake(['first_name' => 'Petr', 'last_name' => 'Novák', 'uic' => 222222]),
+        LdapUser::fake(['first_name' => 'Eva', 'last_name' => 'Černá', 'uic' => 333333]),
+    ]);
+
+    $names = fn (string $query): array => $fake->search($query)->map->name()->all();
+
+    expect($names('Novák Jan'))->toBe(['Jan Novák'])
+        ->and($names('Jan Novák'))->toBe(['Jan Novák'])
+        ->and($names('  novák   jan '))->toBe(['Jan Novák'])
+        ->and($names('novák 222222'))->toBe(['Petr Novák'])
+        // A single word still finds everyone it used to.
+        ->and($names('Novák'))->toBe(['Jan Novák', 'Petr Novák'])
+        // Sharing a surname is not enough when the first name differs.
+        ->and($names('Jan Černá'))->toBe([]);
+});
